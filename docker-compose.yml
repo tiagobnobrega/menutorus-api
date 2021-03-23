@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  app:
+    container_name: menutorus-api
+    build: .
+    command: yarn dev
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - 3000:3000
+      - 9229:9229
+    environment:
+      DB_URL: ""
+    networks:
+      - pg-network
+  db: # <- Este é o identificador a ser utilizado como hostname na conexão do pgadmin
+    container_name: menutorus-db
+    image: postgres:13.2
+    environment:
+      POSTGRES_PASSWORD: "123456"
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./.local/data:/var/lib/postgresql/data
+    networks:
+      - pg-network
+      
+  pgadmin:
+    container_name: menutorus-pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@menutorus.com.br"
+      PGADMIN_DEFAULT_PASSWORD: "123456"
+    ports:
+      - "54321:80"
+    depends_on:
+      - db
+    networks:
+      - pg-network
+networks: 
+  pg-network:
+    driver: bridge

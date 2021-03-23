@@ -1,0 +1,96 @@
+// Migration commands reference:
+// [Run Migrations]: npx prisma migrate dev
+// [Create & Apply Migration]: npx prisma migrate dev --name <NAME>
+// [Create Only Migration]: npx prisma migrate dev --create-only
+
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Business {
+     id         Int      @id @default(autoincrement())
+     title      String   @db.VarChar(255)
+     createdAt  DateTime @default(now()) @db.Timestamp(6)
+     menus       Menu[]
+}
+
+model Lang {
+    id  String      @id @db.VarChar(10)
+    title String    @db.VarChar(100)
+    menus           Menu[]
+}
+
+model Menu {
+    id              Int             @id @default(autoincrement())
+    langs           Lang[]
+    priceUnit       String          @db.VarChar(6)
+    title           String          @db.VarChar(255)
+    sections        MenuSection[]
+    businessId      Int
+    business        Business @relation(fields: [businessId], references: [id])
+}
+
+model MenuSection {
+    id              Int      @id @default(autoincrement())
+    title           String
+    order           Int
+    menuId          Int
+    menu            Menu    @relation(fields: [menuId], references: [id])
+    displayMode     String
+    menuItems       MenuItem[]
+    timeRestriction TimeRestriction[]
+}
+
+model MenuItem {
+    id              Int                 @id @default(autoincrement())
+    menuSectionId    Int
+    section         MenuSection         @relation(fields: [menuSectionId], references: [id])
+    title           String               @db.VarChar(80)
+    abstract        String?              @db.VarChar(140)
+    details         String?              @db.VarChar(500)
+    medias          MenuItemMedia[]
+    enabled         Boolean              @default(true)
+    price           Float?
+    icons           MenuItemIcon[]
+}
+
+model MenuItemIcon {
+    id              Int     @id @default(autoincrement())
+    uri             String  @db.VarChar(1000)
+    contentType     String
+    order           Int     @default(autoincrement())
+    title           String
+    menuItems       MenuItem[]
+}
+
+model MenuItemMedia {
+    id              Int @id @default(autoincrement())
+    mainMedia       Boolean
+    contentType     String
+    uri             String  @db.VarChar(200)
+    menuItem        MenuItem  @relation(fields: [menuItemId], references: [id])
+    menuItemId  Int
+}
+
+model TimeRestriction {
+    id              Int     @id @default(autoincrement())
+    code            String  @unique @db.VarChar(50)
+    times           TimeSpan[]
+    menuSection     MenuSection[]
+}
+
+model TimeSpan {
+    id                  Int     @id @default(autoincrement())
+    timeRestrictionId   Int
+    timeRestriction     TimeRestriction @relation(fields: [timeRestrictionId], references:[id])
+    weekDay             Int //0,6
+    excludeHolidays     Boolean @default(false)
+    startTime           String
+    endTime             String
+}
