@@ -19,12 +19,15 @@ interface RequiredCfg {
   float():number;
   date(format:string):Date;
 }
-const cfg = (envKey:string, defaultValue?: string):Cfg => {
+function cfg(envKey:string):Cfg;
+function cfg(envKey:string, defaultValue: string):RequiredCfg;
+
+function cfg(envKey:string, defaultValue?: string):Cfg|RequiredCfg {
   const rawValue = ENV[envKey] ?? defaultValue;
   const meta: CfgMetaData = { isRequired: false, requiredKey: envKey };
 
   const validateRequired = ():void => {
-    if (meta.isRequired && typeof rawValue === undefined) throw new Error(`Required environment variable "${meta.requiredKey}" not set`);
+    if (meta.isRequired && typeof rawValue === 'undefined') throw new Error(`Required environment variable "${meta.requiredKey}" not set.`);
   };
 
   return {
@@ -51,6 +54,6 @@ const cfg = (envKey:string, defaultValue?: string):Cfg => {
       return format ? dateFns.parse(rawValue, format, new Date()) : dateFns.parseISO(rawValue);
     },
   };
-};
+}
 
 export default cfg;

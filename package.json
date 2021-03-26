@@ -2,16 +2,19 @@
   "name": "menutorus-api",
   "version": "1.0.0",
   "description": "API for Menutorus",
-  "main": "index.js",
+  "main": "dist/src/index.js",
   "license": "MIT",
   "scripts": {
+    "build": "npx tsc",
     "dev": "nodemon --config nodemon.json src/index.ts",
     "dev:debug": "nodemon --config nodemon.json --inspect-brk src/index.ts",
-    "db:seed": "prisma db seed --preview-feature",
+    "prisma:seed": "prisma db seed --preview-feature",
+    "prisma:generate": "npx prisma generate",
     "//dev:debug2": "nodemon --exec 'node --inspect=0.0.0.0:9229 --require ts-node/register src/index.ts'"
   },
   "devDependencies": {
     "@types/faker": "^5.1.7",
+    "@types/hapi__hapi": "^20.0.5",
     "@types/node": "^14.14.35",
     "@types/shelljs": "^0.8.8",
     "@typescript-eslint/eslint-plugin": "^4.4.1",
@@ -35,8 +38,10 @@
     "yargs": "^16.2.0"
   },
   "dependencies": {
+    "@hapi/hapi": "^20.1.2",
     "@prisma/client": "^2.19.0",
     "date-fns": "^2.19.0",
+    "dotenv": "^8.2.0",
     "faker": "^5.4.0",
     "utility-types": "^3.10.0"
   }
