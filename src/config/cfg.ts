@@ -9,12 +9,14 @@ interface CfgMetaData {
 interface Cfg {
   required():RequiredCfg;
   string():string|undefined;
+  boolean():boolean;
   int(radix?:number):number|undefined;
   float():number|undefined;
   date(format:string):Date|undefined;
 }
 interface RequiredCfg {
   string():string;
+  boolean():boolean;
   int(radix?:number):number;
   float():number;
   date(format:string):Date;
@@ -52,6 +54,14 @@ function cfg(envKey:string, defaultValue?: string):Cfg|RequiredCfg {
       validateRequired();
       if (!rawValue) return undefined;
       return format ? dateFns.parse(rawValue, format, new Date()) : dateFns.parseISO(rawValue);
+    },
+    boolean() {
+      validateRequired();
+      const valueToCheck = (rawValue ?? '').toLowerCase();
+      if (!['true', 'false'].includes(valueToCheck)) {
+        throw new Error(`Unparseable boolean value "${rawValue}" for environment variable "${meta.requiredKey}"`);
+      }
+      return valueToCheck === 'true';
     },
   };
 }

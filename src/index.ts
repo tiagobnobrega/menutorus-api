@@ -1,7 +1,9 @@
 import * as Hapi from '@hapi/hapi';
+import httpErrorTransformerPlugin from './plugins/httpErrorTransformerPlugin';
 import config from './config/config';
+import routes from './routes';
 
-const init = async () => {
+const init = async ():Promise<void> => {
   const server = Hapi.server({
     port: 3000,
     host: 'localhost',
@@ -10,9 +12,18 @@ const init = async () => {
     },
   });
 
+  // ==== PLUGINS ====
+  await server.register([{
+    plugin: httpErrorTransformerPlugin,
+    // options: {},
+  }]);
+
+  // ==== ROUTES =====
+  server.realm.modifiers.route.prefix = '/api';
+  server.route(routes);
+
   await server.start();
   console.log('Server running on %s', server.info.uri);
-  console.log({ config });
 };
 
 process.on('unhandledRejection', (err) => {
@@ -20,4 +31,4 @@ process.on('unhandledRejection', (err) => {
   process.exit(1);
 });
 
-init();
+init().catch((error) => console.error('Unexpected error on startup', error));
