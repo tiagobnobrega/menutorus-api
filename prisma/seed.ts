@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import langs from './seedData/langs';
+import seedSample from './seedData/sampleBusiness';
 import timeRestrictions from './seedData/timeRestrictions';
 
 const prisma = new PrismaClient();
@@ -18,6 +19,8 @@ async function main() {
     create: tr,
   }));
   await Promise.all(timeRestrictionPromises);
+
+  await seedSample(prisma);
 }
 
 main()

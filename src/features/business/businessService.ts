@@ -1,4 +1,5 @@
 import { Business, PrismaClient } from '@prisma/client';
+import convertPrismaError from '../shared/primsaUtils';
 import { CrudProvider } from '../shared/types';
 
 const prisma = new PrismaClient();
@@ -11,7 +12,9 @@ const businessService: BusinessServiceProvider = {
     return business.create({ data: businessData });
   },
   async delete(id: number) {
-    await business.delete({ where: { id } });
+    try {
+      await business.delete({ where: { id } });
+    } catch (error) { throw convertPrismaError(error); }
   },
   async get(id: number) {
     return business.findUnique({ where: { id } });

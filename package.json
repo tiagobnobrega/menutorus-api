@@ -1,6 +1,9 @@
 {
   "name": "menutorus-api",
   "version": "1.0.0",
+  "engines": {
+    "node": ">=14"
+  },
   "description": "API for Menutorus",
   "main": "dist/src/index.js",
   "license": "MIT",

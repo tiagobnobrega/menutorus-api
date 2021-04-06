@@ -1,53 +1,63 @@
 import {
-  ResponseObject, ResponseToolkit, ServerRoute, Request,
+  Request, ResponseObject, ResponseToolkit, ServerRoute,
 } from '@hapi/hapi';
-import { Business } from '@prisma/client';
-import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime';
 import httpError from '../shared/httpError';
-import businessService from './businessService';
+import menuSectionService, { RichMenuSection } from './menuSectionService';
+
+const basePath = '/menu-section';
 
 const routes: ServerRoute[] = [
   {
     method: 'GET',
-    path: '/business',
+    path: basePath,
     handler: async (req:Request, h:ResponseToolkit): Promise<ResponseObject> => {
       const { skip, take } = req.query;
-      const data = await businessService.list(skip, take);
+      const data = await menuSectionService.list(skip, take);
       return h.response(data);
     },
   },
   {
     method: 'GET',
-    path: '/business/{id}',
+    path: `${basePath}/menu/{menuId}`,
+    handler: async (req:Request, h:ResponseToolkit): Promise<ResponseObject> => {
+      const { menuId } = req.params;
+      const { skip, take } = req.query;
+      const data = await menuSectionService.listForMenu(Number.parseInt(menuId, 10), skip, take);
+      return h.response(data);
+    },
+  },
+  {
+    method: 'GET',
+    path: `${basePath}/{id}`,
     handler: async (req:Request, h:ResponseToolkit): Promise<ResponseObject> => {
       const { id } = req.params;
-      const data = await businessService.get(Number.parseInt(id, 10));
+      const data = await menuSectionService.get(Number.parseInt(id, 10));
       if (!data) throw httpError(`Business ${id} not found`).status(404).err();
       return h.response(data);
     },
   },
   {
     method: 'PUT',
-    path: '/business',
+    path: basePath,
     handler: async (req:Request, h:ResponseToolkit): Promise<ResponseObject> => {
-      const data = await businessService.update(req.payload as Business);
+      const data = await menuSectionService.update(req.payload as RichMenuSection);
       return h.response(data);
     },
   },
   {
     method: 'POST',
-    path: '/business',
+    path: basePath,
     handler: async (req:Request, h:ResponseToolkit): Promise<ResponseObject> => {
-      const data = await businessService.create(req.payload as Business);
+      const data = await menuSectionService.create(req.payload as RichMenuSection);
       return h.response(data);
     },
   },
   {
     method: 'DELETE',
-    path: '/business/{id}',
+    path: `${basePath}/{id}`,
     handler: async (req:Request, h:ResponseToolkit): Promise<ResponseObject|undefined> => {
       const { id } = req.params;
-      await businessService.delete(Number.parseInt(id, 10));
+      await menuSectionService.delete(Number.parseInt(id, 10));
       return h.response().code(204);
     },
   },
