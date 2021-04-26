@@ -2,11 +2,13 @@
   "restartable": "rs",
   "ignore": [".git", "node_modules/", "dist/", "coverage/"],
   "watch": ["src/"],
+  "signal": "SIGTERM",
   "execMap": {
-    "ts": "node -r dotenv/config -r ts-node/register -r tsconfig-paths/register"
+    "ts": "node -r dotenv/config -r tsconfig-paths/register -r ts-node/register"
   },
   "env": {
     "NODE_ENV": "development"
   },
+  "autoAttachChildProcesses": true,
   "ext": "js,json,ts"
 }

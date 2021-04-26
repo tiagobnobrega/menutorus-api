@@ -6,20 +6,26 @@ interface CfgMetaData {
   isRequired:boolean;
   requiredKey:string;
 }
+
 interface Cfg {
   required():RequiredCfg;
-  string():string|undefined;
+  string(stringDefaultValue: string):string;
+  string():string|void;
   boolean():boolean;
-  int(radix?:number):number|undefined;
-  float():number|undefined;
-  date(format:string):Date|undefined;
+  boolean(booleanDefaultValue: boolean):boolean;
+  int(intDefaultValue:number):number;
+  int():number|void;
+  float():number|void;
+  float(floatDefaultValue: number):number;
+  date(defaultDateValue:undefined, format?:string):Date|void;
+  date(defaultDateValue?:Date, format?:string):Date;
 }
 interface RequiredCfg {
   string():string;
   boolean():boolean;
-  int(radix?:number):number;
+  int():number;
   float():number;
-  date(format:string):Date;
+  date(format?:string):Date;
 }
 function cfg(envKey:string):Cfg;
 function cfg(envKey:string, defaultValue: string):RequiredCfg;
@@ -38,26 +44,29 @@ function cfg(envKey:string, defaultValue?: string):Cfg|RequiredCfg {
       if (key) meta.requiredKey = key;
       return this as RequiredCfg;
     },
-    string() {
+    string(stringDefaultValue = '') {
       validateRequired();
-      return rawValue || '';
+      return rawValue || stringDefaultValue;
     },
-    int(radix = 10) {
+    int(intDefaultValue?: number) {
       validateRequired();
-      return rawValue ? Number.parseInt(rawValue, radix) : undefined;
+      return rawValue ? Number.parseInt(rawValue, 10) : (intDefaultValue as number);
     },
-    float() {
+    float(floatDefaultValue?: number) {
       validateRequired();
-      return rawValue ? Number.parseFloat(rawValue) : undefined;
+      return rawValue ? Number.parseFloat(rawValue) : (floatDefaultValue as number);
     },
-    date(format?:string) {
+    date(defaultDateValue?:Date, format?:string) {
       validateRequired();
-      if (!rawValue) return undefined;
-      return format ? dateFns.parse(rawValue, format, new Date()) : dateFns.parseISO(rawValue);
+      if (rawValue) {
+        return format ? dateFns.parse((rawValue), format, new Date()) : dateFns.parseISO(rawValue);
+      }
+      if (!defaultDateValue) return (undefined as unknown as Date);
+      return defaultDateValue;
     },
-    boolean() {
+    boolean(booleanDefaultValue = false) {
       validateRequired();
-      const valueToCheck = (rawValue ?? '').toLowerCase();
+      const valueToCheck = (rawValue ?? booleanDefaultValue.toString()).toLowerCase();
       if (!['true', 'false'].includes(valueToCheck)) {
         throw new Error(`Unparseable boolean value "${rawValue}" for environment variable "${meta.requiredKey}"`);
       }

@@ -1,8 +1,7 @@
-import { MenuItemMedia, Prisma, PrismaClient } from '@prisma/client';
-import convertPrismaError from '../shared/primsaUtils';
+import { MenuItemMedia, Prisma } from '@prisma/client';
+import { convertPrismaError, prisma } from '../shared/prisma';
 import { CrudProvider } from '../shared/types';
 
-const prisma = new PrismaClient();
 const { menuItemMedia } = prisma;
 
 const menuItemMediaService: CrudProvider<MenuItemMedia> = {
@@ -21,7 +20,7 @@ const menuItemMediaService: CrudProvider<MenuItemMedia> = {
     } catch (error) { throw convertPrismaError(error); }
   },
   async get(id: number) {
-    return menuItemMedia.findUnique({ where: { id } });
+    return await menuItemMedia.findUnique({ where: { id } }) || undefined;
   },
   async list(skip:number, take:number) {
     return menuItemMedia.findMany({ skip, take });

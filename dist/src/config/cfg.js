@@ -21,12 +21,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const dateFns = __importStar(require("date-fns"));
 const ENV = process.env;
-const cfg = (envKey, defaultValue) => {
+function cfg(envKey, defaultValue) {
     const rawValue = ENV[envKey] ?? defaultValue;
     const meta = { isRequired: false, requiredKey: envKey };
     const validateRequired = () => {
-        if (meta.isRequired && typeof rawValue === undefined)
-            throw new Error(`Required environment variable "${meta.requiredKey}" not set`);
+        if (meta.isRequired && typeof rawValue === 'undefined')
+            throw new Error(`Required environment variable "${meta.requiredKey}" not set.`);
     };
     return {
         required(key) {
@@ -35,24 +35,35 @@ const cfg = (envKey, defaultValue) => {
                 meta.requiredKey = key;
             return this;
         },
-        string() {
+        string(stringDefaultValue = '') {
             validateRequired();
-            return rawValue || '';
+            return rawValue || stringDefaultValue;
         },
-        int(radix = 10) {
+        int(intDefaultValue) {
             validateRequired();
-            return rawValue ? Number.parseInt(rawValue, radix) : undefined;
+            return rawValue ? Number.parseInt(rawValue, 10) : intDefaultValue;
         },
-        float() {
+        float(floatDefaultValue) {
             validateRequired();
-            return rawValue ? Number.parseFloat(rawValue) : undefined;
+            return rawValue ? Number.parseFloat(rawValue) : floatDefaultValue;
         },
-        date(format) {
+        date(defaultDateValue, format) {
             validateRequired();
-            if (!rawValue)
+            if (rawValue) {
+                return format ? dateFns.parse((rawValue), format, new Date()) : dateFns.parseISO(rawValue);
+            }
+            if (!defaultDateValue)
                 return undefined;
-            return format ? dateFns.parse(rawValue, format, new Date()) : dateFns.parseISO(rawValue);
+            return defaultDateValue;
+        },
+        boolean(booleanDefaultValue = false) {
+            validateRequired();
+            const valueToCheck = (rawValue ?? booleanDefaultValue.toString()).toLowerCase();
+            if (!['true', 'false'].includes(valueToCheck)) {
+                throw new Error(`Unparseable boolean value "${rawValue}" for environment variable "${meta.requiredKey}"`);
+            }
+            return valueToCheck === 'true';
         },
     };
-};
+}
 exports.default = cfg;

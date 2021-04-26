@@ -1,10 +1,9 @@
 import {
   Lang, Menu, Prisma, PrismaClient,
 } from '@prisma/client';
-import convertPrismaError from '../shared/primsaUtils';
+import { convertPrismaError, prisma } from '../shared/prisma';
 import { CrudProvider } from '../shared/types';
 
-const prisma = new PrismaClient();
 const { menu } = prisma;
 
 export interface RichMenu extends Menu { langs: Lang[] }
@@ -26,7 +25,7 @@ const menuService: BusinessServiceProvider = {
     } catch (error) { throw convertPrismaError(error); }
   },
   async get(id: number) {
-    return menu.findUnique({ where: { id }, include: { langs: true } });
+    return await menu.findUnique({ where: { id }, include: { langs: true } }) || undefined;
   },
   async list(skip:number, take:number) {
     return menu.findMany({ skip, take, include: { langs: true } });

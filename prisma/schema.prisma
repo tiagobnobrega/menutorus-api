@@ -13,11 +13,41 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model User {
+    username        String  @id
+    email           String  @unique
+    emailOnSwitch   String?
+    pwd             String
+    name            String
+    businesses      Business[]
+    isVerified      Boolean    @default(false)
+    tokens          Token[]
+}
+
+model Token {
+    id              String          @id @default(cuid())
+    createdAt       DateTime        @default(now()) @db.Timestamp(6)
+    updatedAt       DateTime        @updatedAt
+    expiresAt       DateTime
+    tokenType       TokenType
+    shortId         String? //short link ref for e-mail
+    user User       @relation(fields: [owner], references: [username])
+    owner           String
+}
+
+enum TokenType {
+  EMAIL //short lived for e-mail confirmation
+  DEFAULT
+  RESET
+}
+
 model Business {
-     id         Int      @id @default(autoincrement())
-     title      String   @db.VarChar(255)
-     createdAt  DateTime @default(now()) @db.Timestamp(6)
-     menus       Menu[]
+     id             Int         @id @default(autoincrement())
+     title          String      @db.VarChar(255)
+     createdAt      DateTime    @default(now()) @db.Timestamp(6)
+     menus          Menu[]
+     ownerUsername  String
+     owner          User        @relation(fields: [ownerUsername], references: [username])
 }
 
 model Lang {
@@ -33,15 +63,15 @@ model Menu {
     title           String          @db.VarChar(255)
     sections        MenuSection[]
     businessId      Int
-    business        Business @relation(fields: [businessId], references: [id])
+    business        Business        @relation(fields: [businessId], references: [id])
 }
 
 model MenuSection {
-    id              Int      @id @default(autoincrement())
+    id              Int             @id @default(autoincrement())
     title           String
     order           Int
     menuId          Int
-    menu            Menu    @relation(fields: [menuId], references: [id])
+    menu            Menu            @relation(fields: [menuId], references: [id])
     displayMode     String
     menuItems       MenuItem[]
     timeRestriction TimeRestriction[]
@@ -49,13 +79,14 @@ model MenuSection {
 
 model MenuItem {
     id              Int                 @id @default(autoincrement())
-    menuSectionId    Int
+    menuSectionId   Int
     section         MenuSection         @relation(fields: [menuSectionId], references: [id])
-    title           String               @db.VarChar(80)
-    abstract        String?              @db.VarChar(140)
-    details         String?              @db.VarChar(500)
+    order           Int                 @default(0)
+    title           String              @db.VarChar(80)
+    abstract        String?             @db.VarChar(140)
+    details         String?             @db.VarChar(500)
     medias          MenuItemMedia[]
-    enabled         Boolean              @default(true)
+    enabled         Boolean             @default(true)
     price           Float?
     icons           MenuItemIcon[]
 }
@@ -70,27 +101,27 @@ model MenuItemIcon {
 }
 
 model MenuItemMedia {
-    id              Int @id @default(autoincrement())
+    id              Int             @id @default(autoincrement())
     mainMedia       Boolean
     contentType     String
-    uri             String  @db.VarChar(200)
-    menuItem        MenuItem  @relation(fields: [menuItemId], references: [id])
+    uri             String          @db.VarChar(200)
+    menuItem        MenuItem        @relation(fields: [menuItemId], references: [id])
     menuItemId  Int
 }
 
 model TimeRestriction {
-    id              Int     @id @default(autoincrement())
-    code            String  @unique @db.VarChar(50)
+    id              Int             @id @default(autoincrement())
+    code            String          @unique @db.VarChar(50)
     times           TimeSpan[]
     menuSection     MenuSection[]
 }
 
 model TimeSpan {
-    id                  Int     @id @default(autoincrement())
+    id                  Int                 @id @default(autoincrement())
     timeRestrictionId   Int
-    timeRestriction     TimeRestriction @relation(fields: [timeRestrictionId], references:[id])
+    timeRestriction     TimeRestriction     @relation(fields: [timeRestrictionId], references:[id])
     weekDay             Int //0,6
-    excludeHolidays     Boolean @default(false)
+    excludeHolidays     Boolean             @default(false)
     startTime           String
     endTime             String
 }

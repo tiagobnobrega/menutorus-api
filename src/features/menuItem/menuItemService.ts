@@ -1,10 +1,9 @@
 import {
-  MenuItem, MenuItemIcon, MenuItemMedia, Prisma, PrismaClient,
+  MenuItem, MenuItemIcon, MenuItemMedia, Prisma,
 } from '@prisma/client';
-import convertPrismaError from '../shared/primsaUtils';
+import { convertPrismaError, prisma } from '../shared/prisma';
 import { CrudProvider } from '../shared/types';
 
-const prisma = new PrismaClient();
 const { menuItem, menuItemMedia } = prisma;
 
 export type RichMenuItem = MenuItem & { medias: MenuItemMedia[]; icons: MenuItemIcon[] };
@@ -38,7 +37,7 @@ const menuItemService: MenuItemServiceProvider = {
     } catch (error) { throw convertPrismaError(error); }
   },
   async get(id: number) {
-    return menuItem.findUnique({ where: { id }, include });
+    return await menuItem.findUnique({ where: { id }, include }) || undefined;
   },
   async list(skip:number, take:number) {
     return menuItem.findMany({ skip, take, include });

@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const client_1 = require("@prisma/client");
 const langs_1 = __importDefault(require("./seedData/langs"));
+const sampleBusiness_1 = __importDefault(require("./seedData/sampleBusiness"));
 const timeRestrictions_1 = __importDefault(require("./seedData/timeRestrictions"));
 const prisma = new client_1.PrismaClient();
 async function main() {
@@ -20,6 +21,7 @@ async function main() {
         create: tr,
     }));
     await Promise.all(timeRestrictionPromises);
+    await sampleBusiness_1.default(prisma);
 }
 main()
     .catch((error) => {

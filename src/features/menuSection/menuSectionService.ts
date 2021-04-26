@@ -1,10 +1,9 @@
 import {
-  MenuSection, Prisma, PrismaClient, TimeRestriction,
+  MenuSection, Prisma, TimeRestriction,
 } from '@prisma/client';
-import convertPrismaError from '../shared/primsaUtils';
+import { convertPrismaError, prisma } from '../shared/prisma';
 import { CrudProvider } from '../shared/types';
 
-const prisma = new PrismaClient();
 const { menuSection } = prisma;
 
 export type RichMenuSection = MenuSection & { timeRestriction: TimeRestriction[] };
@@ -32,7 +31,7 @@ const menuSectionService: MenuSectionServiceProvider = {
     } catch (error) { throw convertPrismaError(error); }
   },
   async get(id: number) {
-    return menuSection.findUnique({ where: { id }, include: { timeRestriction: true } });
+    return await menuSection.findUnique({ where: { id }, include: { timeRestriction: true } }) || undefined;
   },
   async list(skip:number, take:number) {
     return menuSection.findMany({ skip, take, include: { timeRestriction: true } });

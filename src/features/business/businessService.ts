@@ -1,8 +1,7 @@
-import { Business, PrismaClient } from '@prisma/client';
-import convertPrismaError from '../shared/primsaUtils';
+import { Business } from '@prisma/client';
+import { convertPrismaError, prisma } from '../shared/prisma';
 import { CrudProvider } from '../shared/types';
 
-const prisma = new PrismaClient();
 const { business } = prisma;
 
 export type BusinessServiceProvider = CrudProvider<Business>;
@@ -17,7 +16,7 @@ const businessService: BusinessServiceProvider = {
     } catch (error) { throw convertPrismaError(error); }
   },
   async get(id: number) {
-    return business.findUnique({ where: { id } });
+    return await business.findUnique({ where: { id } }) || undefined;
   },
   async list(skip:number, take:number) {
     return business.findMany({ skip, take });
